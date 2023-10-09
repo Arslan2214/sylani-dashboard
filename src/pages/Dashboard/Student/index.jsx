@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-
-import Table from "../../../components/Table"
+import { useCollectionLength } from "../../../config/CollectionLength";
+import Table from "../../../components/Table";
 import { ApartmentOutlined, TeamOutlined } from "@ant-design/icons";
 import DialogSizes from "../../../components/DialogBox";
 
@@ -33,7 +33,7 @@ function Student() {
               className="title-font font-medium text-3xl text-black fonts1"
               style={{ color: true === "dark" ? "white" : "" }}
             >
-              342
+              {useCollectionLength("students")}
             </h2>
             <p
               className={` ${
@@ -105,7 +105,7 @@ function Student() {
               className="title-font font-medium text-3xl text-black fonts1"
               style={{ color: true === "dark" ? "white" : "" }}
             >
-              12
+              {useCollectionLength("courses")}
             </h2>
             <p
               className={` ${
@@ -119,9 +119,9 @@ function Student() {
         </Link>
       </div>
       {/* Dialog Box */}
-      <DialogSizes  />
+      <DialogSizes />
       {/* Table Content */}
-      <Table  />
+      <Table />
     </>
   );
 }

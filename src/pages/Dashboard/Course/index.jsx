@@ -1,7 +1,6 @@
 import React from "react";
 import { updateDoc } from "firebase/firestore";
 import {
-  ApartmentOutlined,
   DeleteOutlined,
   FileProtectOutlined,
   FormOutlined,
@@ -21,6 +20,8 @@ import { doc, deleteDoc } from "firebase/firestore";
 import { ToastContainer, toast } from "react-toastify";
 import { Button } from "antd";
 import { Link } from "react-router-dom";
+import { useCollectionLength } from '../../../config/CollectionLength'
+
 
 export default function DefaultTable() {
   const TABLE_HEAD = ["Roll_No.", "Name", "Phone", "email", "Action"];
@@ -122,7 +123,7 @@ export default function DefaultTable() {
               className="title-font font-medium text-3xl text-black fonts1"
               style={{ color: true === "dark" ? "white" : "" }}
             >
-              342
+              {useCollectionLength("courses")}
             </h2>
             <p
               className={` ${
@@ -158,7 +159,7 @@ export default function DefaultTable() {
               className="title-font font-medium text-3xl text-black fonts1"
               style={{ color: true === "dark" ? "white" : "" }}
             >
-              248
+              {useCollectionLength("students")}
             </h2>
             <p
               className={` ${

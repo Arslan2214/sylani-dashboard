@@ -1,14 +1,18 @@
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { courseData } from "../../Context/courseData";
 import { doc, setDoc } from "firebase/firestore";
 import {
   Button,
   Card,
   Input,
+  Option,
+  Select,
   Typography,
 } from "@material-tailwind/react";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { db } from "../../config/firebase";
+
 export default function SimpleRegistrationForm({ handleOpen }) {
   const StdDefault = {
     rollNo: "",
@@ -16,6 +20,7 @@ export default function SimpleRegistrationForm({ handleOpen }) {
     phone: "",
     email: "",
   };
+  const { data, setData } = useContext(courseData);
   const [stdData, setStdData] = useState(StdDefault);
 
   const handelChange = (e) => {
@@ -80,7 +85,19 @@ export default function SimpleRegistrationForm({ handleOpen }) {
             onChange={(e) => handelChange(e)}
           />
         </div>
-
+        <div className="">
+          <Select label="Select Course">
+            {data && data.length > 0 ? (
+              data.map((course, index) => (
+                <Option key={index}>{course?.name}</Option>
+              ))
+            ) : (
+              <Option value="" disabled>
+                No Courses Available
+              </Option>
+            )}
+          </Select>
+        </div>
         <div className="flex justify-end">
           <Button
             variant="text"

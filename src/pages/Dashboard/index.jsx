@@ -8,7 +8,7 @@ import {
   BarChartOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
-// import Layout from '../../components/Layout';
+import {useCollectionLength} from '../../config/CollectionLength';
 
 function Index() {
   return (
@@ -40,7 +40,7 @@ function Index() {
                   className="title-font font-medium text-3xl text-black fonts1"
                   style={{ color: true === "dark" ? "white" : "" }}
                 >
-                  342
+                  {useCollectionLength("students")}
                 </h2>
                 <p
                   className={` ${
@@ -76,7 +76,7 @@ function Index() {
                   className="title-font font-medium text-3xl text-black fonts1"
                   style={{ color: true === "dark" ? "white" : "" }}
                 >
-                  12
+                  {useCollectionLength("courses")}
                 </h2>
                 <p
                   className={` ${

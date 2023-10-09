@@ -1,5 +1,10 @@
 import { updateDoc } from "firebase/firestore";
-import { DeleteOutlined, FormOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  FormOutlined,
+  StopOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import {
   Card,
   Dialog,
@@ -15,7 +20,15 @@ import { ToastContainer, toast } from "react-toastify";
 import { Button } from "antd";
 
 export default function DefaultTable() {
-  const TABLE_HEAD = ["Roll_No.", "Name", "Phone", "email", "Action"];
+  const TABLE_HEAD = [
+    "Roll_No.",
+    "Name",
+    "Course",
+    "Phone",
+    "email",
+    "Status",
+    "Action",
+  ];
   const [tableRows, setTableRows] = useState();
   const getData = async () => {
     const querySnapshot = await getDocs(collection(db, "students"));
@@ -220,6 +233,15 @@ export default function DefaultTable() {
                       color="blue-gray"
                       className="font-normal"
                     >
+                      Course-Test
+                    </Typography>
+                  </td>
+                  <td className={classes}>
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-normal"
+                    >
                       {phone}
                     </Typography>
                   </td>
@@ -230,6 +252,16 @@ export default function DefaultTable() {
                       className="font-normal"
                     >
                       {email}
+                    </Typography>
+                  </td>
+                  <td className={classes}>
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-normal text-center"
+                    >
+                      {/* <UserOutlined className='relative text-green-600 text-2xl before:w-[4rem] before:content-["Active"] before:text-white before:font-semibold before:bg-gray-800 before:text-sm before:absolute before:-top-[50%] before:-translate-y-[50%] before:left-[50%] before:-translate-x-[50%] before:hidden hover:before:inline-block' /> */}
+                      {/* <StopOutlined className="text-red-600 text-2xl" /> */}
                     </Typography>
                   </td>
                   <td className={`flex justify-start space-x-4 ${classes}`}>

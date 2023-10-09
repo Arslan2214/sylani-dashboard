@@ -3,15 +3,16 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom'
-// import DataProvider from './Context/Data'
+import CourseData from './Context/courseData';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-    {/* <DataProvider> */}
-      <App />
-    {/* </DataProvider> */}
+    <CourseData>
+
+        <App />
+    </CourseData>
     </BrowserRouter>
   </React.StrictMode>
 );
