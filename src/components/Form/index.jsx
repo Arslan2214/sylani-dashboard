@@ -12,6 +12,7 @@ import {
 } from "@material-tailwind/react";
 import { useContext, useState } from "react";
 import { db } from "../../config/firebase";
+import { Checkbox } from "antd";
 
 export default function SimpleRegistrationForm({ handleOpen }) {
   const StdDefault = {
@@ -19,6 +20,8 @@ export default function SimpleRegistrationForm({ handleOpen }) {
     name: "",
     phone: "",
     email: "",
+    course: "",
+    status: false,
   };
   const { data, setData } = useContext(courseData);
   const [stdData, setStdData] = useState(StdDefault);
@@ -27,7 +30,8 @@ export default function SimpleRegistrationForm({ handleOpen }) {
     // Handel change
     return setStdData({
       ...stdData,
-      [e.target.name]: e.target.value,
+      [e.target.name]:
+        e.target.name === "status" ? e.target.checked : e.target.value,
     });
   };
 
@@ -60,7 +64,7 @@ export default function SimpleRegistrationForm({ handleOpen }) {
             type="number"
             value={stdData.rollNo}
             size="lg"
-            label="Roll No."
+            label="Roll No"
             onChange={(e) => handelChange(e)}
           />
           <Input
@@ -85,18 +89,35 @@ export default function SimpleRegistrationForm({ handleOpen }) {
             onChange={(e) => handelChange(e)}
           />
         </div>
-        <div className="">
-          <Select label="Select Course">
+        <div>
+          <Select
+            variant="outlined"
+            onChange={(value) =>
+              handelChange({ target: { name: "course", value } })
+            }
+            label="Select Course"
+          >
             {data && data.length > 0 ? (
               data.map((course, index) => (
-                <Option key={index}>{course?.name}</Option>
+                <Option key={index} value={course?.name}>
+                  {course?.name}
+                </Option>
               ))
             ) : (
-              <Option value="" disabled>
-                No Courses Available
-              </Option>
+              <Option disabled>No Course Available</Option>
             )}
           </Select>
+        </div>
+        <div className="flex justify-center md:justify-start items-center my-2">
+          <Checkbox
+            onChange={(e) => handelChange(e)}
+            // value={stdData.status}
+            name="status"
+            ripple={true}
+            className="text-black accent-slate-600 font-semibold"
+          >
+            Available (Status)
+          </Checkbox>
         </div>
         <div className="flex justify-end">
           <Button

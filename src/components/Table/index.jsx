@@ -2,8 +2,6 @@ import { updateDoc } from "firebase/firestore";
 import {
   DeleteOutlined,
   FormOutlined,
-  StopOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
 import {
   Card,

@@ -4,15 +4,17 @@ import './index.css';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom'
 import CourseData from './Context/courseData';
+import StdContext from './Context/studentData';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-    <CourseData>
-
-        <App />
-    </CourseData>
+      <StdContext>
+        <CourseData>
+          <App />
+        </CourseData>
+      </StdContext>
     </BrowserRouter>
   </React.StrictMode>
 );

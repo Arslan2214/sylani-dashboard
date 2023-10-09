@@ -11,6 +11,7 @@ import {
   Dialog,
   DialogBody,
   Input,
+  Textarea,
   Typography,
 } from "@material-tailwind/react";
 import { collection, getDocs } from "firebase/firestore";
@@ -20,11 +21,18 @@ import { doc, deleteDoc } from "firebase/firestore";
 import { ToastContainer, toast } from "react-toastify";
 import { Button } from "antd";
 import { Link } from "react-router-dom";
-import { useCollectionLength } from '../../../config/CollectionLength'
-
+import { useCollectionLength } from "../../../config/CollectionLength";
 
 export default function DefaultTable() {
-  const TABLE_HEAD = ["Roll_No.", "Name", "Phone", "email", "Action"];
+  const TABLE_HEAD = [
+    "Course_Code.",
+    "Title",
+    "Discription",
+    "Starts",
+    "Ends",
+    "Total Std",
+    "Actions"
+  ];
   const [tableRows, setTableRows] = useState();
   const getData = async () => {
     const querySnapshot = await getDocs(collection(db, "courses"));
@@ -36,21 +44,36 @@ export default function DefaultTable() {
     // console.log(array)
     setTableRows(array);
   };
-  const deleteStd = async (rollNo) => {
+  const deleteStd = async (code) => {
     try {
-      await deleteDoc(doc(db, "courses", rollNo));
-      setTableRows(tableRows.filter((std) => std.rollNo !== rollNo));
+      // await deleteDoc(doc(db, "courses", code));
+      setTableRows(tableRows.filter((std) => std.code !== code));
       toast.success("Data Deleted");
     } catch (err) {
       console.error("Error deleting data:", err);
       toast.error("Error deleting data");
     }
   };
+  async function getRecordCountByCourseName(courseName) {
+    try {
+      const snapshot = await db
+        .collection("students")
+        .where("course", "==", courseName) // Filter by 'course' field matching 'name'
+        .get();
+
+      // Return the number of matching records
+      return snapshot.size;
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      throw error; // You can handle the error as needed
+    }
+  }
   const StdDefault = {
-    rollNo: "",
+    code: "",
     name: "",
-    phone: "",
-    email: "",
+    discription: "",
+    start_Time: "",
+    end_Time: "",
   };
   const [stdData, setStdData] = useState(StdDefault);
 
@@ -62,22 +85,22 @@ export default function DefaultTable() {
     });
   };
 
-  const openUpdate = async (rollNo) => {
-    setStdData(tableRows.find((std) => std.rollNo === rollNo));
+  const openUpdate = async (code) => {
+    setStdData(tableRows.find((std) => std.code === code));
     handleOpen("sm");
   };
 
   const handleUpdate = async () => {
-    const { rollNo } = stdData;
-    const stdToUpdate = tableRows.find((std) => std.rollNo === rollNo);
+    const { code } = stdData;
+    const stdToUpdate = tableRows.find((std) => std.code === code);
 
     const updatedStd = { ...stdToUpdate, ...stdData };
 
     try {
-      await updateDoc(doc(db, "courses", rollNo), updatedStd);
+      await updateDoc(doc(db, "courses", code), updatedStd);
       setTableRows(
         tableRows.map((std) => {
-          if (std.rollNo === rollNo) {
+          if (std.code === code) {
             return updatedStd;
           }
           return std;
@@ -204,42 +227,53 @@ export default function DefaultTable() {
           {/* UPDATE Form */}
           <Card color="transparent" shadow={false}>
             <Typography variant="h4" color="blue-gray">
-              Update Student
+              Add New Course
             </Typography>
             <Typography color="gray" className="mt-1 font-normal">
-              Enter New Data below
+              Enter Complete Data below
             </Typography>
             <form className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-full">
               <div className="mb-4 flex flex-col gap-6">
                 <Input
-                  name="rollNo"
-                  type="number"
-                  value={stdData.rollNo}
+                  name="code"
+                  type="text"
+                  value={stdData.code}
                   size="lg"
-                  label="Roll No."
+                  label="Course Code"
                   onChange={(e) => handelChange(e)}
                 />
                 <Input
                   name="name"
                   value={stdData.name}
                   size="lg"
-                  label="Name"
+                  label="Title"
                   onChange={(e) => handelChange(e)}
                 />
-                <Input
-                  name="phone"
-                  value={stdData.phone}
+                <Textarea
+                  name="discription"
+                  value={stdData.discription}
                   size="lg"
-                  label="Phone"
+                  label="Discription"
                   onChange={(e) => handelChange(e)}
                 />
-                <Input
-                  name="email"
-                  value={stdData.email}
-                  size="lg"
-                  label="Email"
-                  onChange={(e) => handelChange(e)}
-                />
+                <div className="flex gap-2">
+                  <Input
+                    type="date"
+                    name="start_Time"
+                    value={stdData.start_Time}
+                    size="lg"
+                    label="Starts At"
+                    onChange={(e) => handelChange(e)}
+                  />
+                  <Input
+                    type="date"
+                    name="end_Time"
+                    value={stdData.end_Time}
+                    size="lg"
+                    label="Ends At"
+                    onChange={(e) => handelChange(e)}
+                  />
+                </div>
               </div>
 
               <div className="flex justify-end">
@@ -247,7 +281,7 @@ export default function DefaultTable() {
                   variant="text"
                   color="red"
                   onClick={() => handleOpen(null)}
-                  className="mr-2 bg-red-50 my-6"
+                  className="mr-2 text-red-600 bg-red-50 my-6"
                 >
                   <span>Close</span>
                 </Button>
@@ -257,7 +291,7 @@ export default function DefaultTable() {
                   onClick={(e) => handleUpdate(e)}
                   className=" bg-green-600 text-white text-semibold my-6"
                 >
-                  <span>Update Data</span>
+                  <span>Add Course</span>
                 </Button>
               </div>
               <ToastContainer />
@@ -287,21 +321,21 @@ export default function DefaultTable() {
             </tr>
           </thead>
           <tbody>
-            {tableRows?.map(({ rollNo, name, phone, email }, index) => {
+            {tableRows?.map(({ code, name, discription, start_Time, end_Time }, index) => {
               const isLast = index === tableRows.length - 1;
               const classes = isLast
                 ? "p-4"
                 : "p-4 border-b border-blue-gray-50";
 
               return (
-                <tr key={rollNo}>
+                <tr key={code}>
                   <td className={classes}>
                     <Typography
                       variant="small"
                       color="blue-gray"
                       className="font-normal"
                     >
-                      {rollNo}
+                      {code}
                     </Typography>
                   </td>
                   <td className={classes}>
@@ -319,7 +353,7 @@ export default function DefaultTable() {
                       color="blue-gray"
                       className="font-normal"
                     >
-                      {phone}
+                      {discription}
                     </Typography>
                   </td>
                   <td className={classes}>
@@ -328,7 +362,28 @@ export default function DefaultTable() {
                       color="blue-gray"
                       className="font-normal"
                     >
-                      {email}
+                      {start_Time}
+                    </Typography>
+                  </td>
+                  <td className={classes}>
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-normal"
+                    >
+                      {end_Time}
+                    </Typography>
+                  </td>
+                  <td className={classes}>
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-normal"
+                    >
+                      {() =>
+                        !isNaN(getRecordCountByCourseName(name)) ?
+                        getRecordCountByCourseName(name) : 0
+                      }
                     </Typography>
                   </td>
                   <td className={`flex justify-start space-x-4 ${classes}`}>
@@ -339,7 +394,7 @@ export default function DefaultTable() {
                       color="blue-gray"
                       className="font-medium"
                     >
-                      <FormOutlined onClick={() => openUpdate(rollNo)} />
+                      <FormOutlined onClick={() => openUpdate(code)} />
                     </Typography>
                     <Typography
                       as="a"
@@ -348,7 +403,7 @@ export default function DefaultTable() {
                       color="blue-gray"
                       className="font-medium"
                     >
-                      <DeleteOutlined onClick={() => deleteStd(rollNo)} />
+                      <DeleteOutlined onClick={() => deleteStd(code)} />
                     </Typography>
                   </td>
                 </tr>
