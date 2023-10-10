@@ -1,10 +1,11 @@
-import React from "react";
-import { updateDoc } from "firebase/firestore";
+import React, { useContext } from "react";
+import { setDoc, updateDoc } from "firebase/firestore";
 import {
   DeleteOutlined,
   FileProtectOutlined,
   FormOutlined,
   TeamOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import {
   Card,
@@ -17,6 +18,7 @@ import {
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../../config/firebase";
 import { useEffect, useState } from "react";
+import { courseData } from '../../../Context/courseData'
 import { doc, deleteDoc } from "firebase/firestore";
 import { ToastContainer, toast } from "react-toastify";
 import { Button } from "antd";
@@ -24,6 +26,10 @@ import { Link } from "react-router-dom";
 import { useCollectionLength } from "../../../config/CollectionLength";
 
 export default function DefaultTable() {
+  const {data, setData} = useContext(courseData)
+  const [isAddCourseDialogOpen, setIsAddCourseDialogOpen] = useState(false);
+  const [isUpdateCourseDialogOpen, setIsUpdateCourseDialogOpen] =
+    useState(false);
   const TABLE_HEAD = [
     "Course_Code.",
     "Title",
@@ -31,9 +37,10 @@ export default function DefaultTable() {
     "Starts",
     "Ends",
     "Total Std",
-    "Actions"
+    "Actions",
   ];
-  const [tableRows, setTableRows] = useState();
+  const [tableRows, setTableRows] = useState([]);
+
   const getData = async () => {
     const querySnapshot = await getDocs(collection(db, "courses"));
     const array = [];
@@ -43,11 +50,13 @@ export default function DefaultTable() {
     });
     // console.log(array)
     setTableRows(array);
+    setData(array)
   };
-  const deleteStd = async (code) => {
+
+  const deleteStd = async (id) => {
     try {
-      // await deleteDoc(doc(db, "courses", code));
-      setTableRows(tableRows.filter((std) => std.code !== code));
+      await deleteDoc(doc(db, "courses", id));
+      setTableRows(tableRows.filter((std) => std.id !== id));
       toast.success("Data Deleted");
     } catch (err) {
       console.error("Error deleting data:", err);
@@ -65,10 +74,11 @@ export default function DefaultTable() {
       return snapshot.size;
     } catch (error) {
       console.error("Error fetching data:", error);
-      throw error; // You can handle the error as needed
+      return 0; // You can handle the error as needed
     }
   }
   const StdDefault = {
+    id: new Date().getTime().toString(),
     code: "",
     name: "",
     discription: "",
@@ -85,39 +95,57 @@ export default function DefaultTable() {
     });
   };
 
-  const openUpdate = async (code) => {
-    setStdData(tableRows.find((std) => std.code === code));
-    handleOpen("sm");
+  const openUpdate = async (id) => {
+    setStdData(tableRows.find((std) => std?.id === id));
+    handleEditForm();
+  };
+
+  const addCourse = async () => {
+    // Handel submit
+    try {
+      await setDoc(doc(db, "courses", stdData.id), stdData);
+      toast.success("Data Added successfully");
+      setStdData(StdDefault);
+      return;
+    } catch (error) {
+      toast.error("Error in adding document ");
+      console.log("Error", error.message);
+    }
   };
 
   const handleUpdate = async () => {
-    const { code } = stdData;
-    const stdToUpdate = tableRows.find((std) => std.code === code);
+    const { id } = stdData;
+    const stdToUpdate = tableRows.find((std) => std.id === id);
 
     const updatedStd = { ...stdToUpdate, ...stdData };
 
     try {
-      await updateDoc(doc(db, "courses", code), updatedStd);
+      await updateDoc(doc(db, "courses", stdToUpdate.id), updatedStd);
       setTableRows(
         tableRows.map((std) => {
-          if (std.code === code) {
+          if (std.id === id) {
             return updatedStd;
           }
           return std;
         })
       );
+      setStdData(StdDefault)
       toast.success("Data Updated");
     } catch (err) {
       toast.success("Data Updated");
     }
-    handleOpen(null);
+    handleEditForm(null);
   };
 
-  useEffect(() => {
-    getData();
-  }, []);
-  const [size, setSize] = useState(null);
-  const handleOpen = (value) => setSize(value);
+  const [size, setSize] = useState(null);  
+  const handleAddForm = () => {
+    setIsAddCourseDialogOpen(true);
+  };
+
+  const handleEditForm = () => {
+    setIsUpdateCourseDialogOpen(true);
+  };
+
 
   return (
     <>
@@ -196,32 +224,38 @@ export default function DefaultTable() {
         </Link>
       </div>
       {/* Dialog Box */}
-      <div className="flex justify-end px-4 mt-3 mb-6">
+      <div className="flex items-center justify-end px-4 mt-3 mb-6">
+        <div
+          className="font-bold cursor-pointer text-gray-500"
+          onClick={() => getData()}
+        >
+          <Typography
+            variant="large"
+            color="blue-gray"
+            className="px-1 aspect-square mr-3 shadow-md rounded-full"
+          >
+            <ReloadOutlined />
+          </Typography>
+        </div>
         <div className="text-end">
           <Button
             style={{
               background: "green",
             }}
             className="font-semibold text-white"
-            onClick={() => handleOpen("sm")}
+            onClick={() => handleAddForm("sm")}
             variant="gradient"
           >
             Add Course
           </Button>
         </div>
       </div>
-      {/* Table Content */}
+      {/* Add Form */}
       <Dialog
-        open={
-          size === "xs" ||
-          size === "sm" ||
-          size === "md" ||
-          size === "lg" ||
-          size === "xl" ||
-          size === "xxl"
-        }
+        open={isAddCourseDialogOpen}
         size={size || "md"}
-        handler={handleOpen}
+        handler={() => setIsAddCourseDialogOpen(false)}
+        onClickOutside={() => setIsAddCourseDialogOpen(false)}
       >
         <DialogBody style={{ textAlign: "center" }}>
           {/* UPDATE Form */}
@@ -280,7 +314,7 @@ export default function DefaultTable() {
                 <Button
                   variant="text"
                   color="red"
-                  onClick={() => handleOpen(null)}
+                  onClick={() => setIsAddCourseDialogOpen(false)}
                   className="mr-2 text-red-600 bg-red-50 my-6"
                 >
                   <span>Close</span>
@@ -288,7 +322,7 @@ export default function DefaultTable() {
                 <Button
                   variant="gradient"
                   color="green"
-                  onClick={(e) => handleUpdate(e)}
+                  onClick={() => addCourse()}
                   className=" bg-green-600 text-white text-semibold my-6"
                 >
                   <span>Add Course</span>
@@ -299,6 +333,92 @@ export default function DefaultTable() {
           </Card>
         </DialogBody>
       </Dialog>
+
+      {/* Update Form */}
+      <Dialog
+        open={isUpdateCourseDialogOpen}
+        size={size || "md"}
+        handler={() => setIsUpdateCourseDialogOpen(false)}
+        onClickOutside={() => setIsUpdateCourseDialogOpen(false)}
+      >
+        <DialogBody style={{ textAlign: "center" }}>
+          {/* UPDATE Form */}
+          <Card color="transparent" shadow={false}>
+            <Typography variant="h4" color="blue-gray">
+              Update Course
+            </Typography>
+            <Typography color="gray" className="mt-1 font-normal">
+              Add New Data below
+            </Typography>
+            <form className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-full">
+              <div className="mb-4 flex flex-col gap-6">
+                <Input
+                  name="code"
+                  type="text"
+                  value={stdData.code}
+                  size="lg"
+                  label="Course Code"
+                  onChange={(e) => handelChange(e)}
+                />
+                <Input
+                  name="name"
+                  value={stdData.name}
+                  size="lg"
+                  label="Title"
+                  onChange={(e) => handelChange(e)}
+                />
+                <Textarea
+                  name="discription"
+                  value={stdData.discription}
+                  size="lg"
+                  label="Discription"
+                  onChange={(e) => handelChange(e)}
+                />
+                <div className="flex gap-2">
+                  <Input
+                    type="date"
+                    name="start_Time"
+                    value={stdData.start_Time}
+                    size="lg"
+                    label="Starts At"
+                    onChange={(e) => handelChange(e)}
+                  />
+                  <Input
+                    type="date"
+                    name="end_Time"
+                    value={stdData.end_Time}
+                    size="lg"
+                    label="Ends At"
+                    onChange={(e) => handelChange(e)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button
+                  variant="text"
+                  color="red"
+                  onClick={() => setIsUpdateCourseDialogOpen(false)}
+                  className="mr-2 text-red-600 bg-red-50 my-6"
+                >
+                  <span>Close</span>
+                </Button>
+                <Button
+                  variant="gradient"
+                  color="green"
+                  onClick={() => handleUpdate()}
+                  className=" bg-green-600 text-white text-semibold my-6"
+                >
+                  <span>Update Course</span>
+                </Button>
+              </div>
+              <ToastContainer />
+            </form>
+          </Card>
+        </DialogBody>
+      </Dialog>
+
+      {/* Table Content */}
       <Card className="h-full w-full overflow-scroll">
         <ToastContainer />
         <table className="w-full min-w-max table-auto text-left">
@@ -321,94 +441,96 @@ export default function DefaultTable() {
             </tr>
           </thead>
           <tbody>
-            {tableRows?.map(({ code, name, discription, start_Time, end_Time }, index) => {
-              const isLast = index === tableRows.length - 1;
-              const classes = isLast
-                ? "p-4"
-                : "p-4 border-b border-blue-gray-50";
+            {tableRows?.map(
+              (
+                { id, code, name, discription, start_Time, end_Time },
+                index
+              ) => {
+                const isLast = index === tableRows.length - 1;
+                const classes = isLast
+                  ? "p-4"
+                  : "p-4 border-b border-blue-gray-50";
 
-              return (
-                <tr key={code}>
-                  <td className={classes}>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal"
-                    >
-                      {code}
-                    </Typography>
-                  </td>
-                  <td className={classes}>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal"
-                    >
-                      {name}
-                    </Typography>
-                  </td>
-                  <td className={classes}>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal"
-                    >
-                      {discription}
-                    </Typography>
-                  </td>
-                  <td className={classes}>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal"
-                    >
-                      {start_Time}
-                    </Typography>
-                  </td>
-                  <td className={classes}>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal"
-                    >
-                      {end_Time}
-                    </Typography>
-                  </td>
-                  <td className={classes}>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal"
-                    >
-                      {() =>
-                        !isNaN(getRecordCountByCourseName(name)) ?
-                        getRecordCountByCourseName(name) : 0
-                      }
-                    </Typography>
-                  </td>
-                  <td className={`flex justify-start space-x-4 ${classes}`}>
-                    <Typography
-                      as="a"
-                      href="#"
-                      variant="large"
-                      color="blue-gray"
-                      className="font-medium"
-                    >
-                      <FormOutlined onClick={() => openUpdate(code)} />
-                    </Typography>
-                    <Typography
-                      as="a"
-                      href="#"
-                      variant="large"
-                      color="blue-gray"
-                      className="font-medium"
-                    >
-                      <DeleteOutlined onClick={() => deleteStd(code)} />
-                    </Typography>
-                  </td>
-                </tr>
-              );
-            })}
+                return (
+                  <tr key={code}>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {code}
+                      </Typography>
+                    </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {name}
+                      </Typography>
+                    </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {discription}
+                      </Typography>
+                    </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {start_Time}
+                      </Typography>
+                    </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {end_Time}
+                      </Typography>
+                    </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {() => getRecordCountByCourseName(name)}
+                      </Typography>
+                    </td>
+                    <td className={`flex justify-start space-x-4 ${classes}`}>
+                      <Typography
+                        as="a"
+                        href="#"
+                        variant="large"
+                        color="blue-gray"
+                        className="font-medium"
+                      >
+                        <FormOutlined onClick={() => openUpdate(id)} />
+                      </Typography>
+                      <Typography
+                        as="a"
+                        href="#"
+                        variant="large"
+                        color="blue-gray"
+                        className="font-medium"
+                      >
+                        <DeleteOutlined onClick={() => deleteStd(id)} />
+                      </Typography>
+                    </td>
+                  </tr>
+                );
+              }
+            )}
           </tbody>
         </table>
       </Card>

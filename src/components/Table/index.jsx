@@ -2,20 +2,26 @@ import { updateDoc } from "firebase/firestore";
 import {
   DeleteOutlined,
   FormOutlined,
+  UserOutlined,
+  StopOutlined,
 } from "@ant-design/icons";
 import {
   Card,
+  Checkbox,
   Dialog,
   DialogBody,
   Input,
+  Option,
+  Select,
   Typography,
 } from "@material-tailwind/react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../config/firebase";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { doc, deleteDoc } from "firebase/firestore";
 import { ToastContainer, toast } from "react-toastify";
 import { Button } from "antd";
+import { courseData } from "../../Context/courseData";
 
 export default function DefaultTable() {
   const TABLE_HEAD = [
@@ -28,6 +34,7 @@ export default function DefaultTable() {
     "Action",
   ];
   const [tableRows, setTableRows] = useState();
+  const { data, setData } = useContext(courseData);
   const getData = async () => {
     const querySnapshot = await getDocs(collection(db, "students"));
     const array = [];
@@ -38,6 +45,7 @@ export default function DefaultTable() {
     // console.log(array)
     setTableRows(array);
   };
+
   const deleteStd = async (rollNo) => {
     try {
       await deleteDoc(doc(db, "students", rollNo));
@@ -51,8 +59,10 @@ export default function DefaultTable() {
   const StdDefault = {
     rollNo: "",
     name: "",
+    course: "",
     phone: "",
     email: "",
+    status: false,
   };
   const [stdData, setStdData] = useState(StdDefault);
 
@@ -60,7 +70,8 @@ export default function DefaultTable() {
     // Handel change
     return setStdData({
       ...stdData,
-      [e.target.name]: e.target.value,
+      [e.target.name]:
+        e.target.name === "status" ? e.target.checked : e.target.value,
     });
   };
 
@@ -138,6 +149,7 @@ export default function DefaultTable() {
                   label="Name"
                   onChange={(e) => handelChange(e)}
                 />
+                <Checkbox checked={() => {}} />
                 <Input
                   name="phone"
                   value={stdData.phone}
@@ -153,7 +165,36 @@ export default function DefaultTable() {
                   onChange={(e) => handelChange(e)}
                 />
               </div>
-
+              <div>
+                <Select
+                  variant="outlined"
+                  onChange={(value) =>
+                    handelChange({ target: { name: "course", value } })
+                  }
+                  label="Select Course"
+                >
+                  {data && data.length > 0 ? (
+                    data.map((course, index) => (
+                      <Option key={index} value={course?.name}>
+                        {course?.name}
+                      </Option>
+                    ))
+                  ) : (
+                    <Option disabled>No Course Available</Option>
+                  )}
+                </Select>
+              </div>
+              <div className="flex justify-center md:justify-start items-center my-2">
+                <Checkbox
+                  onChange={(e) => handelChange(e)}
+                  // value={stdData.status}
+                  name="status"
+                  ripple={true}
+                  className="text-black accent-slate-600 font-semibold"
+                >
+                  Available (Status)
+                </Checkbox>
+              </div>
               <div className="flex justify-end">
                 <Button
                   variant="text"
@@ -199,92 +240,97 @@ export default function DefaultTable() {
             </tr>
           </thead>
           <tbody>
-            {tableRows?.map(({ rollNo, name, phone, email }, index) => {
-              const isLast = index === tableRows.length - 1;
-              const classes = isLast
-                ? "p-4"
-                : "p-4 border-b border-blue-gray-50";
+            {tableRows?.map(
+              ({ rollNo, name, course, phone, email, status }, index) => {
+                const isLast = index === tableRows.length - 1;
+                const classes = isLast
+                  ? "p-4"
+                  : "p-4 border-b border-blue-gray-50";
 
-              return (
-                <tr key={rollNo}>
-                  <td className={classes}>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal"
-                    >
-                      {rollNo}
-                    </Typography>
-                  </td>
-                  <td className={classes}>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal"
-                    >
-                      {name}
-                    </Typography>
-                  </td>
-                  <td className={classes}>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal"
-                    >
-                      Course-Test
-                    </Typography>
-                  </td>
-                  <td className={classes}>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal"
-                    >
-                      {phone}
-                    </Typography>
-                  </td>
-                  <td className={classes}>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal"
-                    >
-                      {email}
-                    </Typography>
-                  </td>
-                  <td className={classes}>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal text-center"
-                    >
-                      {/* <UserOutlined className='relative text-green-600 text-2xl before:w-[4rem] before:content-["Active"] before:text-white before:font-semibold before:bg-gray-800 before:text-sm before:absolute before:-top-[50%] before:-translate-y-[50%] before:left-[50%] before:-translate-x-[50%] before:hidden hover:before:inline-block' /> */}
-                      {/* <StopOutlined className="text-red-600 text-2xl" /> */}
-                    </Typography>
-                  </td>
-                  <td className={`flex justify-start space-x-4 ${classes}`}>
-                    <Typography
-                      as="a"
-                      href="#"
-                      variant="large"
-                      color="blue-gray"
-                      className="font-medium"
-                    >
-                      <FormOutlined onClick={() => openUpdate(rollNo)} />
-                    </Typography>
-                    <Typography
-                      as="a"
-                      href="#"
-                      variant="large"
-                      color="blue-gray"
-                      className="font-medium"
-                    >
-                      <DeleteOutlined onClick={() => deleteStd(rollNo)} />
-                    </Typography>
-                  </td>
-                </tr>
-              );
-            })}
+                return (
+                  <tr key={rollNo}>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {rollNo}
+                      </Typography>
+                    </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {name}
+                      </Typography>
+                    </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {course}
+                      </Typography>
+                    </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {phone}
+                      </Typography>
+                    </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {email}
+                      </Typography>
+                    </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal text-center"
+                      >
+                        {status ? (
+                          <UserOutlined className='relative text-green-600 text-xl before:w-[4rem] before:content-["Active"] before:text-white before:font-semibold before:bg-gray-800 before:text-sm before:absolute before:-top-[50%] before:-translate-y-[50%] before:left-[50%] before:-translate-x-[50%] before:hidden hover:before:inline-block' />
+                        ) : (
+                          <StopOutlined className="text-red-600 text-lg" />
+                        )}
+                      </Typography>
+                    </td>
+                    <td className={`flex justify-start space-x-4 ${classes}`}>
+                      <Typography
+                        as="a"
+                        href="#"
+                        variant="large"
+                        color="blue-gray"
+                        className="font-medium"
+                      >
+                        <FormOutlined onClick={() => openUpdate(rollNo)} />
+                      </Typography>
+                      <Typography
+                        as="a"
+                        href="#"
+                        variant="large"
+                        color="blue-gray"
+                        className="font-medium"
+                      >
+                        <DeleteOutlined onClick={() => deleteStd(rollNo)} />
+                      </Typography>
+                    </td>
+                  </tr>
+                );
+              }
+            )}
           </tbody>
         </table>
       </Card>

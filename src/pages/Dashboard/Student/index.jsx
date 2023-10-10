@@ -1,11 +1,40 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCollectionLength } from "../../../config/CollectionLength";
 import Table from "../../../components/Table";
 import { ApartmentOutlined, TeamOutlined } from "@ant-design/icons";
 import DialogSizes from "../../../components/DialogBox";
+import { db } from "../../../config/firebase";
 
 function Student() {
+  const [recordCount, setRecordCount] = useState(0);
+
+  async function getRecordCountByCourseName() {
+    try {
+      const snapshot = await db
+        .collection("students")
+        .where("status", "==", true)
+        .get();
+
+      return snapshot.size;
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      return -1;
+    }
+  }
+
+  useEffect(() => {
+    getRecordCountByCourseName()
+      .then((count) => {
+        if (count !== -1) {
+          setRecordCount(count);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }, []);
+
   return (
     <>
       <div className="flex flex-wrap justify-evenly text-center">
@@ -69,7 +98,7 @@ function Student() {
               className="title-font font-medium text-3xl text-black fonts1"
               style={{ color: true === "dark" ? "white" : "" }}
             >
-              248
+              {recordCount === -1 ? "0" : recordCount}
             </h2>
             <p
               className={` ${

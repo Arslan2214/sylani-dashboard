@@ -16,7 +16,7 @@ const App = () => {
   const [collapsed, setCollapsed] = React.useState(false);
   return (
     <Layout hasSider>
-      <div className=" hidden md:inline-block">
+      <div className="hidden md:inline-block">
 
         <Sider trigger={null} collapsible
           style={{
