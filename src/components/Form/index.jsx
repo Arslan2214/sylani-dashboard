@@ -16,6 +16,7 @@ import { Checkbox } from "antd";
 
 export default function SimpleRegistrationForm({ handleOpen }) {
   const StdDefault = {
+    date: new Date().toLocaleDateString(),
     rollNo: "",
     name: "",
     phone: "",

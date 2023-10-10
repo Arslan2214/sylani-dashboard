@@ -121,7 +121,7 @@ function Index() {
                   }  font-bold`}
                   style={{ color: true === "dark" ? "white" : "" }}
                 >
-                  Today's Attendent
+                  Students added This Month
                 </p>
               </div>
             </Link>
@@ -137,11 +137,17 @@ function Index() {
                     "April",
                     "May",
                     "June",
+                    "July",
+                    "August",
+                    "September",
+                    "October",
+                    "November",
+                    "December",
                   ],
                   datasets: [
                     {
-                      label: "Students Attendence",
-                      data: [65, 59, 80, 81, 56, 55, 40],
+                      label: "Students Added",
+                      data: [65, 59, 80, 81, 56, 55, 40, 59, 80, 81, 56, 48],
                       fill: false,
                       borderColor: "rgb(75, 192, 192)",
                       tension: 0.1,

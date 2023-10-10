@@ -30,9 +30,10 @@ function Student() {
         .where("status", "==", true)
         .get();
 
+        console.log('snapshot =>', snapshot)
       return snapshot.size;
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.log(error);
       return -1;
     }
   }
@@ -47,7 +48,7 @@ function Student() {
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
-  }, [data]);
+  }, []);
 
   return (
     <>
