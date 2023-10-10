@@ -18,7 +18,7 @@ import {
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../../config/firebase";
 import { useEffect, useState } from "react";
-import { courseData } from '../../../Context/courseData'
+import { courseData } from "../../../Context/courseData";
 import { doc, deleteDoc } from "firebase/firestore";
 import { ToastContainer, toast } from "react-toastify";
 import { Button } from "antd";
@@ -26,7 +26,7 @@ import { Link } from "react-router-dom";
 import { useCollectionLength } from "../../../config/CollectionLength";
 
 export default function DefaultTable() {
-  const {data, setData} = useContext(courseData)
+  const { data, setData } = useContext(courseData);
   const [isAddCourseDialogOpen, setIsAddCourseDialogOpen] = useState(false);
   const [isUpdateCourseDialogOpen, setIsUpdateCourseDialogOpen] =
     useState(false);
@@ -50,8 +50,12 @@ export default function DefaultTable() {
     });
     // console.log(array)
     setTableRows(array);
-    setData(array)
+    setData(array);
   };
+
+  useEffect(() => {
+    getData();
+  }, []);
 
   const deleteStd = async (id) => {
     try {
@@ -129,7 +133,7 @@ export default function DefaultTable() {
           return std;
         })
       );
-      setStdData(StdDefault)
+      setStdData(StdDefault);
       toast.success("Data Updated");
     } catch (err) {
       toast.success("Data Updated");
@@ -137,7 +141,7 @@ export default function DefaultTable() {
     handleEditForm(null);
   };
 
-  const [size, setSize] = useState(null);  
+  const [size, setSize] = useState(null);
   const handleAddForm = () => {
     setIsAddCourseDialogOpen(true);
   };
@@ -145,7 +149,6 @@ export default function DefaultTable() {
   const handleEditForm = () => {
     setIsUpdateCourseDialogOpen(true);
   };
-
 
   return (
     <>

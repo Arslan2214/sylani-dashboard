@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-
+import { Chart as ChartJS } from "chart.js/auto";
+import { Doughnut, Line } from "react-chartjs-2";
 // import GraphLine from '../../components/Graphes/Wave'
 
 import {
@@ -8,7 +9,7 @@ import {
   BarChartOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
-import {useCollectionLength} from '../../config/CollectionLength';
+import { useCollectionLength } from "../../config/CollectionLength";
 
 function Index() {
   return (
@@ -124,6 +125,47 @@ function Index() {
                 </p>
               </div>
             </Link>
+          </div>
+          <div className="grid md:grid-cols-5 gap-6 mt-8 w-full">
+            <div className="flex flex-col justify-center items-center shadow-[0_0_4px_rgba(0,0,0,0.3)] p-4 md:col-span-3 rounded-md">
+              <Line
+                data={{
+                  labels: [
+                    "January",
+                    "February",
+                    "March",
+                    "April",
+                    "May",
+                    "June",
+                  ],
+                  datasets: [
+                    {
+                      label: "Students Attendence",
+                      data: [65, 59, 80, 81, 56, 55, 40],
+                      fill: false,
+                      borderColor: "rgb(75, 192, 192)",
+                      tension: 0.1,
+                    },
+                  ],
+                }}
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                }}
+              />
+            </div>
+            <div className="flex flex-col justify-center items-center shadow-[0_0_4px_rgba(0,0,0,0.3)] p-4 md:col-span-2 rounded-md">
+              <Doughnut
+                data={{
+                  labels: ["In-Progress", "Completed", "Upcomming"],
+                  datasets: [{ label: "Course", data: [10, 30, 50] }],
+                }}
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                }}
+              />
+            </div>
           </div>
         </div>
       </section>

@@ -23,7 +23,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { Button } from "antd";
 import { courseData } from "../../Context/courseData";
 
-export default function DefaultTable() {
+export default function DefaultTable({ getStudentData }) {
   const TABLE_HEAD = [
     "Roll_No.",
     "Name",
@@ -33,17 +33,10 @@ export default function DefaultTable() {
     "Status",
     "Action",
   ];
-  const [tableRows, setTableRows] = useState();
+  const [tableRows, setTableRows] = useState([]);
   const { data, setData } = useContext(courseData);
   const getData = async () => {
-    const querySnapshot = await getDocs(collection(db, "students"));
-    const array = [];
-    querySnapshot.forEach((doc) => {
-      let data = doc.data();
-      array.push(data);
-    });
-    // console.log(array)
-    setTableRows(array);
+    setTableRows(await getStudentData());
   };
 
   const deleteStd = async (rollNo) => {
@@ -149,7 +142,6 @@ export default function DefaultTable() {
                   label="Name"
                   onChange={(e) => handelChange(e)}
                 />
-                <Checkbox checked={() => {}} />
                 <Input
                   name="phone"
                   value={stdData.phone}
@@ -165,35 +157,33 @@ export default function DefaultTable() {
                   onChange={(e) => handelChange(e)}
                 />
               </div>
-              <div>
-                <Select
-                  variant="outlined"
-                  onChange={(value) =>
-                    handelChange({ target: { name: "course", value } })
-                  }
-                  label="Select Course"
-                >
-                  {data && data.length > 0 ? (
-                    data.map((course, index) => (
-                      <Option key={index} value={course?.name}>
-                        {course?.name}
-                      </Option>
-                    ))
-                  ) : (
-                    <Option disabled>No Course Available</Option>
-                  )}
-                </Select>
-              </div>
+              <Select
+                variant="outlined"
+                selected={stdData.course}
+                onChange={(value) =>
+                  handelChange({ target: { name: "course", value } })
+                }
+                label="Select Course"
+              >
+                {data && data.length > 0 ? (
+                  data.map((course, index) => (
+                    <Option key={index} value={course?.name}>
+                      {course?.name}
+                    </Option>
+                  ))
+                ) : (
+                  <Option disabled>No Course Available</Option>
+                )}
+              </Select>
               <div className="flex justify-center md:justify-start items-center my-2">
                 <Checkbox
                   onChange={(e) => handelChange(e)}
-                  // value={stdData.status}
+                  label="Available(Status)"
+                  checked={stdData.status}
                   name="status"
                   ripple={true}
                   className="text-black accent-slate-600 font-semibold"
-                >
-                  Available (Status)
-                </Checkbox>
+                />
               </div>
               <div className="flex justify-end">
                 <Button

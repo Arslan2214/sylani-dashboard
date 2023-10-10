@@ -1,14 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCollectionLength } from "../../../config/CollectionLength";
 import Table from "../../../components/Table";
 import { ApartmentOutlined, TeamOutlined } from "@ant-design/icons";
 import DialogSizes from "../../../components/DialogBox";
 import { db } from "../../../config/firebase";
+import { courseData } from '../../../Context/courseData'
+import { collection, getDocs } from "firebase/firestore";
 
 function Student() {
+  const { data } = useContext(courseData);
   const [recordCount, setRecordCount] = useState(0);
 
+  const getStudentData = async () => {
+    const querySnapshot = await getDocs(collection(db, "students"));
+    const array = [];
+    querySnapshot.forEach((doc) => {
+      let data = doc.data();
+      array.push(data);
+    });
+
+    return array
+    // console.log(array)
+  };
   async function getRecordCountByCourseName() {
     try {
       const snapshot = await db
@@ -33,7 +47,7 @@ function Student() {
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
-  }, []);
+  }, [data]);
 
   return (
     <>
@@ -148,9 +162,9 @@ function Student() {
         </Link>
       </div>
       {/* Dialog Box */}
-      <DialogSizes />
+      <DialogSizes getStudentData={getStudentData} />
       {/* Table Content */}
-      <Table />
+      <Table getStudentData={getStudentData} />
     </>
   );
 }

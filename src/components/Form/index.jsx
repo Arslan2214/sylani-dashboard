@@ -23,7 +23,7 @@ export default function SimpleRegistrationForm({ handleOpen }) {
     course: "",
     status: false,
   };
-  const { data, setData } = useContext(courseData);
+  const { data } = useContext(courseData);
   const [stdData, setStdData] = useState(StdDefault);
 
   const handelChange = (e) => {
