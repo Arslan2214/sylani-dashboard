@@ -51,14 +51,14 @@ export default function SimpleRegistrationForm({ handleOpen }) {
   };
 
   return (
-    <Card color="transparent" shadow={false}>
+    <Card color="transparent w-full" shadow={false}>
       <Typography variant="h4" color="blue-gray">
         Add Student
       </Typography>
       <Typography color="gray" className="mt-1 font-normal">
         Enter your details of Student
       </Typography>
-      <form className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-full">
+      <form className="mt-8 mb-2 w-full">
         <div className="mb-4 flex flex-col gap-6">
           <Input
             name="rollNo"

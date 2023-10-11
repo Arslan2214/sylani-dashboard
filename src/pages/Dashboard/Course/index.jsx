@@ -153,7 +153,7 @@ export default function DefaultTable() {
   return (
     <>
       <div className="flex flex-wrap justify-evenly text-center">
-        <Link to="/student" className="p-4 sm:w-1/2 w-full">
+        <Link to="/course" className="p-4 sm:w-1/2 w-full">
           <div
             className={`${true === "light" && "border-2"} ${
               true === "dark" && "shadow-slate-500"
@@ -269,7 +269,7 @@ export default function DefaultTable() {
             <Typography color="gray" className="mt-1 font-normal">
               Enter Complete Data below
             </Typography>
-            <form className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-full">
+            <form className="mt-8 mb-2 w-full">
               <div className="mb-4 flex flex-col gap-6">
                 <Input
                   name="code"
